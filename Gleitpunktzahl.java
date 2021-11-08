@@ -176,7 +176,7 @@ public class Gleitpunktzahl {
 		 */
 		
 		this.normalisiere();
-		System.out.println("Test number: " + d + "\t After normalization: " + this.toString());
+		// System.out.println("Test number: " + d + "\t After normalization: " + this.toString());
 	}
 
 	/** liefert eine String-Repraesentation des Objekts */
@@ -293,38 +293,32 @@ public class Gleitpunktzahl {
 	 * Beispiel: Bei 3 Mantissenbits wird die Zahl 10.11 * 2^-1 zu 1.10 * 2^0
 	 */
 	public void normalisiere() {
-		boolean round = false;
-		while (mantisse >= 1 << sizeMantisse) { 			// 2^sizeMantisse
-			mantisse /= 2;
+		while (mantisse >= 1 << sizeMantisse) { 			// 2^sizeMantisse	upper bound
+			mantisse >>= 1;									// >>
 			if (exponent < (1 << sizeExponent) - 2) {		// check for +Inf or -Inf when < 0
 				exponent++;
 			} else {
-				if (mantisse == 0){
-					this.setInfinite(vorzeichen);
-					return;
-				} else{
-					this.setNaN();
-					return;
-				}
+				this.setInfinite(false);
+				return; 
 			}
-			if (exponent < 0) {								// check for -Inf when the number is out of lower bound but still > 0
-				this.setInfinite(true);
+		}
+		while (mantisse < 1 << (sizeMantisse - 1)) {		// check lower		lower bound
+			mantisse <<= 1;									// <<
+			if (exponent == 0){ 								// check for -Inf when the number is out of lower bound but still > 0
+				this.setInfinite(true); 
 				return;
 			}
-			// 0 is handled automatically
-			// NaN?
+			else
+				exponent--;
 		}
-		round = (mantisse & 1) == 1;
-		if (round) {
+		if ((mantisse & 1) == 1) {
 			mantisse++;
 			if (mantisse >= 1 << sizeMantisse) {
-				mantisse /= 2;
+				mantisse >>= 1;
 				if (exponent == (1 << sizeExponent) - 1){	// Inf
-					if (mantisse != 0) 
-						this.setNaN();
-					else 
-						this.setInfinite(vorzeichen);
-				} 	
+					this.setInfinite(vorzeichen);
+					return;
+				}
 				else 
 					exponent++;
 			}
@@ -348,19 +342,17 @@ public class Gleitpunktzahl {
 		if (a.isNull() || b.isNull() || a.isNaN() || b.isNaN() || a.isInfinite() || b.isInfinite()) 
 			return;
 		Gleitpunktzahl big, small;
-		boolean round = false;
 		if (a.compareAbsTo(b) == 0 || a.exponent == b.exponent) 		//same exp or same thing
 			return;
 		big = a.compareAbsTo(b)>0?a:b;
 		small = big.compareAbsTo(a)==0?b:a;
 		while (big.exponent > small.exponent) {
-			small.exponent++;
-			small.mantisse >>= 1;
-			round = (small.mantisse & 1) == 1;
-		}
-		if (round) 
-			small.mantisse++;		 // small.exp == big.exp < maxExp so no inf.
-		
+            big.exponent--;
+            big.mantisse <<= 1;
+        }
+        if ((big.mantisse & 1) == 1)
+            big.mantisse++;     // small.exp == big.exp < maxExp so no inf.
+
 		/*
 		 * TODO: hier ist die Operation denormalisiere zu implementieren.
 		 */
@@ -373,19 +365,9 @@ public class Gleitpunktzahl {
 	 * gespeichert, normiert, und dieses wird zurueckgegeben.
 	 */
 	public Gleitpunktzahl add(Gleitpunktzahl r) {
-		// if (this.vorzeichen != r.vorzeichen) {
-		// 	if (this.vorzeichen == false) {
-		// 		r.vorzeichen = false;				// make it positive
-		// 		sub(r);
-		// 	} else{
-		// 		this.vorzeichen = false;
-		// 		r.sub(this);
-		// 	}
-		// }
-
 		// special case handling
 		Gleitpunktzahl res = new Gleitpunktzahl();
-		if (r.isInfinite() && this.isInfinite()) {
+		if (r.isInfinite() == true & this.isInfinite() == true) {
 			if (r.vorzeichen != this.vorzeichen) {
 				Gleitpunktzahl undefined = new Gleitpunktzahl();
 				undefined.setNaN();
@@ -404,17 +386,40 @@ public class Gleitpunktzahl {
 		if (this.vorzeichen == r.vorzeichen) {						// same vorzeichen
 			res.mantisse = this.mantisse + r.mantisse;
 			res.vorzeichen = this.vorzeichen;
-			if (res.mantisse >= 1 << sizeMantisse){					// out of bound 	1 << 2   man >= 100  <==>  man > 11
-				res.setNaN();
-			}
 
 		} else {													// different vorzeichen
-
+			if (this.vorzeichen == false) {							// this + r -
+				if (this.mantisse >= r.mantisse) {					// |this| >= |r|
+					res.mantisse = this.mantisse - r.mantisse;
+					res.vorzeichen = false;
+				} else {												// |this| < |r|
+					res.mantisse =  r.mantisse - this.mantisse;
+					res.vorzeichen = true;
+				} 														// this - r +
+			} else {
+				if (this.mantisse >= r.mantisse) {					// |this| >= |r|
+					res.mantisse = this.mantisse - r.mantisse;
+					res.vorzeichen = true;
+				} else {												// |this| < |r|
+					res.mantisse =  r.mantisse - this.mantisse;
+					res.vorzeichen = false;
+				} 														// this - r +
+			}
 		}
 
+		// out of bound check
+		if (res.mantisse == 0) {
+			res.setNull();
+			return res;
+		}
+			
+		if (exponent == (1 << sizeExponent) - 1) {
+			res.setInfinite(res.vorzeichen);
+			return res;
+		}
 
-		
-		
+		res.normalisiere();
+		return res;
 
 		//overflow
 		/*
@@ -422,8 +427,6 @@ public class Gleitpunktzahl {
 		 * Funktionen normalisiere und denormalisiere.
 		 * Achten Sie auf Sonderfaelle!
 		 */
-
-		return new Gleitpunktzahl();
 	}
 
 	/**
@@ -439,7 +442,6 @@ public class Gleitpunktzahl {
 		 * Funktionen normalisiere und denormalisiere.
 		 * Achten Sie auf Sonderfaelle!
 		 */
-		 
 		return add(r);
 	}
 	

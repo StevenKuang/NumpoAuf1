@@ -26,7 +26,7 @@ public class Test_Gleitpunktzahl {
 		Gleitpunktzahl.setSizeMantisse(8);
 		Gleitpunktzahl.setSizeExponent(2);	// [0.5, 3.625]
 
-		Gleitpunktzahl x;
+		Gleitpunktzahl x, x1;
 		Gleitpunktzahl y;
 		Gleitpunktzahl test, test2;
 		Gleitpunktzahl gleitref = new Gleitpunktzahl();
@@ -42,7 +42,7 @@ public class Test_Gleitpunktzahl {
 			x = new Gleitpunktzahl(0.5);
 			// Referenzwerte setzen
 			gleitref = new Gleitpunktzahl(0.5);
-
+			Gleitpunktzahl.denormalisiere(test, test2);
 			// Test, ob Ergebnis korrekt
 			if (x.compareAbsTo(gleitref) != 0
 					|| x.vorzeichen != gleitref.vorzeichen) {
@@ -135,15 +135,16 @@ public class Test_Gleitpunktzahl {
 			// Test: Sonderfaelle
 			// 0 - inf
 			System.out.println("Test: Sonderfaelle");
-			x = new Gleitpunktzahl(0.0);
+			x = new Gleitpunktzahl(2.0);
 			y = new Gleitpunktzahl(1.0 / 0.0);
+			x1 = new Gleitpunktzahl(2.0);
 
 			// Referenzwerte setzen
 			gleitref.setInfinite(true);
-
+			gleitref = x1.sub(x);
 			// Berechnung mit der Methode des Studenten durchfuehren
 			gleiterg = x.sub(y);
-
+			
 			// Test, ob Ergebnis korrekt
 			if (gleiterg.compareAbsTo(gleitref) != 0
 					|| gleiterg.vorzeichen != gleitref.vorzeichen) {
