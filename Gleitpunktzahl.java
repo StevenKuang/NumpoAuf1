@@ -293,7 +293,9 @@ public class Gleitpunktzahl {
 	 * Beispiel: Bei 3 Mantissenbits wird die Zahl 10.11 * 2^-1 zu 1.10 * 2^0
 	 */
 	public void normalisiere() {
+		boolean round = false;
 		while (mantisse >= 1 << sizeMantisse) { 			// 2^sizeMantisse	upper bound
+			round = (mantisse & 1) == 1;
 			mantisse >>= 1;									// >>
 			if (exponent < (1 << sizeExponent) - 2) {		// check for +Inf or -Inf when < 0
 				exponent++;
@@ -302,16 +304,23 @@ public class Gleitpunktzahl {
 				return; 
 			}
 		}
+		if (exponent < 0) {		// man < maxMan, exp < 0
+			this.setNaN();
+			return;
+		}
 		while (mantisse < 1 << (sizeMantisse - 1)) {		// check lower		lower bound
 			mantisse <<= 1;									// <<
-			if (exponent == 0){ 								// check for -Inf when the number is out of lower bound but still > 0
-				this.setInfinite(true); 
-				return;
+			if (exponent == 0){ 							// check for -Inf when the number is out of lower bound but still > 0
+				if (vorzeichen == true) {					// have to check the vor- see if it's really -inf or just (0.5, 0)
+					this.setInfinite(true);return; 
+				} else {
+					this.setNaN(); return;	
+				}
 			}
 			else
 				exponent--;
 		}
-		if ((mantisse & 1) == 1) {
+		if (round) {
 			mantisse++;
 			if (mantisse >= 1 << sizeMantisse) {
 				mantisse >>= 1;
@@ -323,6 +332,7 @@ public class Gleitpunktzahl {
 					exponent++;
 			}
 		}
+		
 		/*
 		 * TODO: hier ist die Operation normalisiere zu implementieren.
 		 * Beachten Sie, dass die Groesse (Anzahl der Bits) des Exponenten
