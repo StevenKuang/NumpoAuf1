@@ -45,8 +45,8 @@ public class FastMath {
 	 */
 	public static Gleitpunktzahl invSqrt(Gleitpunktzahl x) {
 		Gleitpunktzahl res = new Gleitpunktzahl();
-		if (x.vorzeichen == true || x.isNaN()) {
-			res.isNaN();
+		if (x.vorzeichen || x.isNaN()) {
+			res.setNaN();
 			return res;
 		}
 		if (x.isNull()){
