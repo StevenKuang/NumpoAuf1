@@ -106,6 +106,15 @@ public class Test_Gleitpunktzahl {
                     printErg("" + testList.get(i).toDouble(), "" + refList.get(i).toDouble());
                 }
             }
+/*            Gleitpunktzahl.setSizeMantisse(8); //
+            Gleitpunktzahl.setSizeExponent(4);    //
+            Gleitpunktzahl finalTest = new Gleitpunktzahl();
+            finalTest.mantisse = 56;
+            finalTest.exponent = 0;
+            finalTest.vorzeichen = true;
+            finalTest.normalisiere();
+
+            System.out.println(finalTest+ " in double  "+ finalTest.toDouble());*/
 
             System.out.println("\n\nEIGENE TESTS EINFÜGEN!!!!!!!\n\n");
 

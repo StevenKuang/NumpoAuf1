@@ -334,7 +334,7 @@ public class Gleitpunktzahl {
             mantisse <<= 1;                                    // <<
             if (exponent == 0) {                            // check for -Inf when the number is out of lower bound but still > 0
                 if (vorzeichen) {                    // have to check the vor- see if it's really -inf or just (0.5, 0)
-                    this.setInfinite(true);
+                    this.setNull();
                 } else {
                     this.setNaN();
                 }
