@@ -63,12 +63,12 @@ public class Test_Gleitpunktzahl {
         testList.add(test);
         refList.add(ref);
 
-		// test for numbers out of range => lower bound
-		test = new Gleitpunktzahl(-3.9);
-		ref = new Gleitpunktzahl();
-		ref.setInfinite(true);
-		testList.add(test);
-		refList.add(ref);
+        // test for numbers out of range => lower bound
+        test = new Gleitpunktzahl(-3.9);
+        ref = new Gleitpunktzahl();
+        ref.setInfinite(true);
+        testList.add(test);
+        refList.add(ref);
 
         // test for number in range
         test = new Gleitpunktzahl(1.9032);  // is 1,875 the right answer here ?
