@@ -180,7 +180,6 @@ public class Gleitpunktzahl {
          */
 
         this.normalisiere();
-        // System.out.println("Test number: " + d + "\t After normalization: " + this.toString());
     }
 
     /**
@@ -306,21 +305,21 @@ public class Gleitpunktzahl {
      */
     public void normalisiere() {
         // our normalisiere gets a number in the form : m'*2^(e''-o) with e''=e'-1=> which means our mantissa m' is 1 bit longer than needed in order to perform the rounding
-        // d is a number in  [1,2) and m' is the bitweise representation of that number with (sizeMantissa + 1) bits
+        // d is a number in  [1,2) and m' is the bitweise representation of that number
         // [1,2)*2^(e-o-1)
 
         boolean round = false;
         while (mantisse >= 1 << sizeMantisse) {            // 2^sizeMantisse	upper bound
             round = (mantisse & 1) == 1;
             mantisse >>= 1;                                    // >>
-            if (exponent < (1 << sizeExponent) - 2) {        // check for +Inf or -Inf when < 0  // replace this with maxExponent attribute  // why -2 ??
+            if (exponent < (1 << sizeExponent) - 2) {        // check for +Inf or -Inf when < 0  // replace this with maxExponent attribute
                 exponent++;
             } else {
-                this.setInfinite(vorzeichen);                //why? if exponent==Max exponent and mantissa==0 we set the number to - or +inf according to vorzeichen
+                this.setInfinite(vorzeichen);                //if exponent==Max exponent and mantissa==0 we set the number to - or +inf according to vorzeichen
                 return;
             }
         }
-        if (exponent < 0) {        // man < maxMan, exp < 0  //but this case should theoretically be never reached ...
+        if (exponent < 0) {        // man < maxMan, exp < 0
             //the case where exponent = -1 which means the gespeicherte exponent was 0 which means the actual exponent is 0-offset = -offset
             if (exponent == -1) {
                 this.mantisse = 1 << (sizeMantisse - 1);
@@ -330,7 +329,7 @@ public class Gleitpunktzahl {
             this.setNaN();
             return;
         }
-        while (mantisse < 1 << (sizeMantisse - 1)) {        // check lower		lower bound
+        while (mantisse < 1 << (sizeMantisse - 1)) {        // check lower bound
             mantisse <<= 1;                                    // <<
             if (exponent == 0) {                            // check for -Inf when the number is out of lower bound but still > 0
                 if (vorzeichen) {                    // have to check the vor- see if it's really -inf or just (0.5, 0)
@@ -357,9 +356,7 @@ public class Gleitpunktzahl {
             this.setInfinite(vorzeichen);
         }
 
-
         /*
-         * TODO: hier ist die Operation normalisiere zu implementieren.
          * Beachten Sie, dass die Groesse (Anzahl der Bits) des Exponenten
          * und der Mantisse durch sizeExponent bzw. sizeMantisse festgelegt
          * ist.
@@ -387,10 +384,6 @@ public class Gleitpunktzahl {
         }
         if ((big.mantisse & 1) == 1)
             big.mantisse++;     // small.exp == big.exp < maxExp so no inf.
-
-        /*
-         * TODO: hier ist die Operation denormalisiere zu implementieren.
-         */
     }
 
     /**
@@ -456,12 +449,6 @@ public class Gleitpunktzahl {
         res.normalisiere();
         return res;
 
-        //overflow
-        /*
-         * TODO: hier ist die Operation add zu implementieren. Verwenden Sie die
-         * Funktionen normalisiere und denormalisiere.
-         * Achten Sie auf Sonderfaelle!
-         */
     }
 
     /**
@@ -472,11 +459,6 @@ public class Gleitpunktzahl {
      */
     public Gleitpunktzahl sub(Gleitpunktzahl r) {
         r.vorzeichen = !r.vorzeichen;
-        /*
-         * TODO: hier ist die Operation sub zu implementieren. Verwenden Sie die
-         * Funktionen normalisiere und denormalisiere.
-         * Achten Sie auf Sonderfaelle!
-         */
         return add(r);
     }
 
